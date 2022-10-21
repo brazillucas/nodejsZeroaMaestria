@@ -1,0 +1,14 @@
+{
+  "name": "meu_projeto",
+  "version": "1.0.0",
+  "description": "Primeiro Projeto nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no teapi.gst specified\" && exit 1"
+  },
+  "keywords": [
+    "npm"
+  ],
+  "author": "brazillucas",
+  "license": "MIT"
+}
