@@ -4,6 +4,8 @@ const chalk = require('chalk');
 
 // modulos internos
 const fs = require('fs');
+const { type } = require('os');
+const { get } = require('http');
 
 operation();
 
@@ -62,11 +64,25 @@ function buildAccount() {
             {
                 name: 'accountName',
                 message: 'Digite um nome para a sua conta: ',
+            },
+            {
+                name: 'password',
+                type: 'password',
+                message: 'Digite uma senha: '
+            },
+            {
+                name: 'confirmPassword',
+                type: 'password',
+                message: 'Confirme a senha: '
             }
         ])
         .then((answer) => {
             const accountName = answer['accountName'];
-            console.info(accountName);
+            const password = answer['password'];
+            const confirmPassword = answer['confirmPassword'];
+
+            
+            // console.info(accountName);
 
             if (!fs.existsSync('accounts')) {
                 fs.mkdirSync('accounts');
@@ -80,19 +96,72 @@ function buildAccount() {
                 return;
             }
 
+            if (!checkPassword(password, confirmPassword)) {
+                console.log(chalk.bgRed.black('As senhas não conferem!'));
+                buildAccount();
+                return;
+            }            
+
             fs.writeFileSync(
                 `accounts/${accountName}.json`,
-                '{"balance": 0}',
+                JSON.stringify({
+
+                    "password": password,
+                    "balance": 0
+                }),
                 function(err) {
                     console.log(err);
-                 },
+                },
             );
 
-            console.log(chalk.bgGreen.black(`Conta ${accountName} criada com sucesso!`));
+        console.log(chalk.bgGreen.black(`Conta ${accountName} criada com sucesso!`));
+        
             
-            reset();
+        reset();
+        
         })
         .catch((err) => console.log(err));
+}
+
+// Ler senha
+function readPassword(accountName) {
+    inquirer
+        .prompt([            
+            {
+                name: 'readedPassword',
+                type: 'password',
+                message: 'Digite a sua senha conta: ',
+            }
+        ])
+        .then((answer) => {            
+            const readedPassword = answer['readedPassword'];
+            const accountData = getAccount(accountName);
+            const accountPassword = accountData.password;
+
+            if(!checkPassword(readedPassword, accountPassword)) {
+                console.log(
+                    chalk.bgRed.black(`Senha Incorreta`)
+                );
+                if (readPassword === -1) {
+                    return false;
+                }
+                return readPassword();
+            }
+
+            return accountPassword;
+
+        })
+        .catch((err) => console.log(err));
+
+}
+
+function checkPassword(firstPassword, confirmPassword) {
+    
+    if(firstPassword !== confirmPassword) {
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -110,9 +179,10 @@ function deposit() {
         const accountName = answer['accountName'];
 
         if (!checkAccount(accountName)) {
+            console.log(chalk.bgRed.black(`Esta conta não existe!`));
             return deposit();
         }
-
+ 
         setMontante(accountName);
     
     })
@@ -123,7 +193,6 @@ function deposit() {
 function checkAccount(accountName) {
 
     if (!fs.existsSync(`accounts/${accountName}.json`)) {
-        console.log(chalk.bgRed.black(`Esta conta não existe!`));
         return false;
     }
 
@@ -195,7 +264,12 @@ function getSaldo() {
             const accountName = answer['accountName'];
     
             if (!checkAccount(accountName)) {
+                console.log(chalk.bgRed.black(`Esta conta não existe!`));
                 return getSaldo();
+            }
+            
+            if(!readPassword(accountName)) {
+                reset();
             }
     
             const accountData = getAccount(accountName);
@@ -223,6 +297,7 @@ function sacar(account) {
         const accountName = answer['accountName'];
 
         if(!checkAccount(accountName)) {
+            console.log(chalk.bgRed.black(`Esta conta não existe!`));
             return sacar();
         }
 
@@ -306,13 +381,12 @@ function writeValue (accountName, accountData) {
     );
 }
 
-// Limpar console
-
+// Limpar console e chamar a função principal
 async function reset() {
     
     await espera(2000);
 
-    console.clear();
+    // console.clear();
 
     operation();
 
@@ -322,4 +396,4 @@ function espera(ms) {
     return new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
-  }  
+  }
