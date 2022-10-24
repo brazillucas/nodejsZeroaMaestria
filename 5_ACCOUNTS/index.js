@@ -144,7 +144,7 @@ function readPassword(accountName) {
             chalk.bgRed.black(`Senha Incorreta`)
           );
           if (readPassword === -1) {
-            return callback(false);
+            return reject('Senha incorreta');
           }
           return readPassword();
         }
