@@ -125,33 +125,37 @@ function buildAccount() {
 
 // Ler senha
 function readPassword(accountName) {
+  return new Promise((resolve, reject) => {
     inquirer
-        .prompt([            
-            {
-                name: 'readedPassword',
-                type: 'password',
-                message: 'Digite a sua senha conta: ',
-            }
-        ])
-        .then((answer) => {            
-            const readedPassword = answer['readedPassword'];
-            const accountData = getAccount(accountName);
-            const accountPassword = accountData.password;
+      .prompt([            
+        {
+          name: 'readedPassword',
+          type: 'password',
+          message: 'Digite a sua senha conta: ',
+        }
+      ])
+      .then((answer) => {            
+        const readedPassword = answer['readedPassword'];
+        const accountData = getAccount(accountName);
+        const accountPassword = accountData.password;
 
-            if(!checkPassword(readedPassword, accountPassword)) {
-                console.log(
-                    chalk.bgRed.black(`Senha Incorreta`)
-                );
-                if (readPassword === -1) {
-                    return false;
-                }
-                return readPassword();
-            }
-
-            return accountPassword;
-
-        })
-        .catch((err) => console.log(err));
+        if(!checkPassword(readedPassword, accountPassword)) {
+          console.log(
+            chalk.bgRed.black(`Senha Incorreta`)
+          );
+          if (readPassword === -1) {
+            return callback(false);
+          }
+          return readPassword();
+        }
+  
+        resolve(accountPassword)
+      })
+    .catch((err) => {
+      console.log(err)
+      reject(err)
+    });
+  })
 
 }
 
@@ -267,18 +271,21 @@ function getSaldo() {
                 console.log(chalk.bgRed.black(`Esta conta não existe!`));
                 return getSaldo();
             }
-            
-            if(!readPassword(accountName)) {
+
+            readPassword(accountName)
+              .then(() => {
+                const accountData = getAccount(accountName);
+        
+                console.log(
+                    chalk.bgGreen.black(`O saldo da conta ${accountName} é de R$${accountData.balance}.`)
+                );
+
                 reset();
-            }
+
+              })
+              .catch((err) => console.log(err))
+            
     
-            const accountData = getAccount(accountName);
-    
-            console.log(
-                chalk.bgGreen.black(`O saldo da conta ${accountName} é de R$${accountData.balance}.`)
-            );
-    
-            reset();
         })
         .catch((err) => console.log(err));
 }
