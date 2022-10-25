@@ -6,6 +6,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const { type } = require('os');
 const { get } = require('http');
+const { resolve } = require('path');
 
 operation();
 
@@ -58,17 +59,88 @@ function createAccount() {
 
 // Construir a conta
 function buildAccount() {
-    
+    console.log(chalk.blue(`Insira -1 para cancelar a operação!\n`));
+
     inquirer
         .prompt([
             {
                 name: 'accountName',
                 message: 'Digite um nome para a sua conta: ',
-            },
+                validate: function (value) {
+                    if (checkAccount(value)) {
+                        return chalk.bgRed.black(`Esta conta já existe, escolha outro nome!`)
+                        
+                    }
+                    return true;
+
+                }
+            }
+        ])
+        .then((answer) => {
+            const accountName = answer['accountName'];
+
+            if (accountName == -1) {
+                console.log(chalk.bgRed.black('Operação cancelada!\n'));
+                return reset();
+            }
+
+            if (!fs.existsSync('accounts')) {
+                fs.mkdirSync('accounts');
+            }
+
+            console.log(chalk.blueBright(`\nPor favor, digite uma senha que contenha pelo menos:\n -4 números`));
+            console.log(chalk.blueBright(`Insira -1 para cancelar a operação!\n`));
+
+            let accountPassword;
+
+            createPassword()
+            .then((password) => {
+                accountPassword = password;
+
+                const accountData =
+                {
+                    "name" :accountName,
+                    "password": accountPassword,
+                    "balance": 0
+                }
+
+                writeValue(accountName, accountData);
+
+            console.log(chalk.bgGreen.black(`Conta ${accountName} criada com sucesso!`));
+
+            reset();
+
+            })
+            .catch((err) => {
+                console.log(err)
+                buildAccount();
+                return;
+            });
+        })
+        .catch((err) => console.log(err));
+}
+
+function createPassword() {
+
+    return new Promise ((resolve, reject) => {
+        
+        // const reg = /^(?=[^0-9]*[0-9]).{4,8}$/g;
+        const reg = /^(\-[1-1])|((?=[^0-9]*[0-9]).{4,8})$/g;
+
+        inquirer
+        .prompt([
             {
                 name: 'password',
                 type: 'password',
-                message: 'Digite uma senha: '
+                message: 'Digite uma senha: ',
+                validate: function (value) {
+                    if (value.match(reg)) {
+                        
+                        return true;
+                    } else {
+                        return `Por favor, digite uma senha que contenha pelo menos:\n\t- 4 números`;
+                    }
+                },
             },
             {
                 name: 'confirmPassword',
@@ -77,60 +149,64 @@ function buildAccount() {
             }
         ])
         .then((answer) => {
-            const accountName = answer['accountName'];
             const password = answer['password'];
             const confirmPassword = answer['confirmPassword'];
 
-            
-            // console.info(accountName);
-
-            if (!fs.existsSync('accounts')) {
-                fs.mkdirSync('accounts');
+            if (password == -1) {
+                reject('Operação cancelada!\n');
             }
 
-            if (checkAccount(accountName)) {
-                console.log(
-                    chalk.bgRed.black(`Esta conta já existe, escolha outro nome!`)
-                );
-                buildAccount();
-                return;
-            }
 
             if (!checkPassword(password, confirmPassword)) {
                 console.log(chalk.bgRed.black('As senhas não conferem!'));
-                buildAccount();
+                createPassword();
                 return;
-            }            
+            }
 
-            fs.writeFileSync(
-                `accounts/${accountName}.json`,
-                JSON.stringify({
-
-                    "password": password,
-                    "balance": 0
-                }),
-                function(err) {
-                    console.log(err);
-                },
-            );
-
-        console.log(chalk.bgGreen.black(`Conta ${accountName} criada com sucesso!`));
-        
-            
-        reset();
-        
+            resolve(password);
         })
-        .catch((err) => console.log(err));
+        //     const accountData = getAccount(accountName);
+
+        //     accountData.password = password;
+
+        //     writeValue(accountName, accountData);
+        //     // return password;
+        // })
+        .catch((err) => {
+            console.log(err)
+            reject(err);
+        });
+        
+    })
 }
+
+
 
 // Ler senha
 function readPassword(accountName) {
-    inquirer
-        .prompt([            
+    
+    return new Promise((resolve, reject) => {
+
+        inquirer
+        .prompt([
             {
                 name: 'readedPassword',
                 type: 'password',
                 message: 'Digite a sua senha conta: ',
+                validate: function (value) {
+                    const accountData = getAccount(accountName);
+                    const accountPassword = accountData.password;
+
+                    if(!checkPassword(value, accountPassword)) {
+                        // console.log(
+                        //     chalk.bgRed.black(``)
+                        // );
+                        // readPassword(accountName);
+                        return `Senha Incorreta`;
+                    } else {
+                        return true
+                    }
+                }
             }
         ])
         .then((answer) => {            
@@ -138,20 +214,20 @@ function readPassword(accountName) {
             const accountData = getAccount(accountName);
             const accountPassword = accountData.password;
 
-            if(!checkPassword(readedPassword, accountPassword)) {
-                console.log(
-                    chalk.bgRed.black(`Senha Incorreta`)
-                );
-                if (readPassword === -1) {
-                    return false;
-                }
-                return readPassword();
-            }
 
-            return accountPassword;
+            if (readedPassword === -1) {
+                return reject('Operação Cancelada');
+            }            
+
+            resolve(accountPassword);
 
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            console.log(err)
+            reject(err);
+        });
+
+    })
 
 }
 
@@ -268,17 +344,19 @@ function getSaldo() {
                 return getSaldo();
             }
             
-            if(!readPassword(accountName)) {
+            readPassword(accountName)
+            .then(() => {
+                const accountData = getAccount(accountName);
+
+                console.log(
+                    chalk.bgGreen.black(`O saldo da conta ${accountName} é de R$${accountData.balance}.`)
+                );
+    
                 reset();
-            }
-    
-            const accountData = getAccount(accountName);
-    
-            console.log(
-                chalk.bgGreen.black(`O saldo da conta ${accountName} é de R$${accountData.balance}.`)
-            );
-    
-            reset();
+
+            })
+            .catch((err) => console.log(err))
+            
         })
         .catch((err) => console.log(err));
 }
@@ -309,8 +387,6 @@ function sacar(account) {
         
     })
     .catch((err) => console.log(err));
-
-
 
 }
 
