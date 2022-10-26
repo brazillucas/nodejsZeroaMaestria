@@ -4,9 +4,6 @@ const chalk = require('chalk');
 
 // modulos internos
 const fs = require('fs');
-const { type } = require('os');
-const { get } = require('http');
-const { resolve } = require('path');
 
 operation();
 
@@ -660,7 +657,7 @@ function reset() {
     
     espera(2000)
     .then(() => {
-        // console.clear();
+        console.clear();
         operation();
     })
     .catch((err) => console.log(err));
