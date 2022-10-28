@@ -1,0 +1,12 @@
+<h1>Veja os nossos posts</h1>
+
+<div class="card">
+    
+    {{#each posts}}
+        {{> post}}
+        <a href="/blog/#" class="btn btn-primary">Ver post</a>
+        <br>
+        <br>
+    {{/each}}
+
+</div>

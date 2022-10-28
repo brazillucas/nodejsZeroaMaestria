@@ -1,0 +1,35 @@
+<h2 class="card-header">{{this.title}}</h2>
+
+
+<div class="card-body">
+    <h6 class="card-text">Categoria: <mark>{{this.category}}</mark></h6>
+
+    <p class="card-text">{{this.content}}</p>
+
+    <div class="row">
+
+    <div class="card-header">
+        Comentários
+    </div>
+
+    <div class="card">
+        <div class="card-group">
+            <div class="row">
+            {{#each this.comments}}
+
+                <div class="card text-bg-dark mb-3 w-25">
+                    <div class="card-body">
+                        <h6 class="card-header">Comentário</h6>
+                        <p class="card-text">{{this}}</p>
+                    </div>
+                </div>
+            
+            {{!-- <br> --}}
+            
+            {{/each}}
+            </div>
+        </div>
+        </div>
+    </div>
+
+</div>

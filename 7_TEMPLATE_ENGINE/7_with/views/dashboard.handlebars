@@ -1,0 +1,38 @@
+<style>
+table, th, td {
+  border:1px solid black;
+}
+</style>
+
+<h1>Dashboard</h1>
+
+<p>O nome dele é {{user.name}} {{user.surname}}</p>
+
+<h1>Olá Handlebars</h1>
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Preço</th>
+        <th>Frágil</th>
+    </tr>
+    {{#each products}}
+        <tr>
+            <td>{{this.name}}</td>
+            <td>R$ {{this.price}}</td>
+            <td>
+                {{#if this.fragil}}
+                Sim
+                {{else}}
+                Não
+                {{/if}}
+            </td>
+        </tr>
+    {{/each}}
+
+</table>
+<br>
+
+<form method="get" action="/">
+    <button type="submit">Voltar</button>
+</form>
