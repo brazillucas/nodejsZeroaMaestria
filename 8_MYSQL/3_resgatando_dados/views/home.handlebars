@@ -1,0 +1,25 @@
+<h1>Cadastre o seu livro:</h1>
+<div class="col-lg-6 justify-content-center">
+    <form action="/books/insertbook" method="post" class="form-control">
+        <div class="row-6 mb-4">
+
+            <div class="col-6 d-flex ">
+                <div class="form-outline mb-4">
+                    <label for="titler" class="form-label" >Título:</label>
+                    <input type="text" name="title" id="title" placeholder="Digite o título" class="form-control">
+                </div>
+            </div>
+            <div class="col-6 d-flex justify-content-center">
+                <div class="col">
+                    <div class="form-outline mb-4">
+                        <label for="pagesqty" class="form-label" >Páginas:</label>
+                        <input type="number" name="pagesqty" id="pagesqty" placeholder="Quantas páginas tem?" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" value="Cadastrar" class="btn btn-primary btn-block">Cadastrar</button>
+            
+        </div>
+    </form>
+</div>
