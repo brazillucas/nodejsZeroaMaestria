@@ -1,0 +1,24 @@
+<div class="container conteudo">
+
+  <h1>Livros disponíveis:</h1>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">TÍTULO</th>
+        <th scope="col">QTD PÁGINAS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each books}}
+          <tr>
+              <th scope="row"><a href="/books/{{id}}" class="list-group-item list-group-item-action">{{id}}</a></th>
+              <td><a href="/books/{{id}}" class="list-group-item list-group-item-action">{{title}}</a></td>
+              <td>{{pagesqty}}</td>
+          </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+</div>
