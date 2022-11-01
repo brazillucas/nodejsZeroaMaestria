@@ -1,0 +1,24 @@
+<div class="container ">
+    <div class="col-4 mx-auto text-center">
+        <div class=" fs-1 text-wrap pb-2">{{book.title}}</div>
+        <div class="table-group-divider"><br></div>
+        <p class="fs-5">Este livro tem <span class="text-danger">{{book.pagesqty}}</span> páginas.</p>
+        
+        <div class="d-flex align-items-center justify-content-center mb-3">
+            <a href="/books/editbook/{{book.id}}" class="btn btn-warning mx-2">Editar</a>
+            
+            <form action="/books/deletebook/{{book.id}}" method="post">
+                <input type="hidden" name="id" value="{{book.id}}">
+                <button type="submit" class="btn btn-danger">Excluir</button>
+            </form>
+        </div>
+
+        <div class="table-group-divider"><br></div>
+
+        <form action="/books">
+            <button type="submit" class="btn btn-primary">Voltar</button>
+        </form>
+    </div>
+
+    
+</div>
